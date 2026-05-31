@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>
+<title>Solar system - 31/5/2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0a14; color: #ccc; font-family: sans-serif; padding: 12px; }
+canvas { display: block; width: 100%; height: 540px; border-radius: 8px;
+         border: 1px solid #333; cursor: grab; }
+canvas:active { cursor: grabbing; }
+h1 { font-size: 15px; font-weight: 500; color: #eee; margin-bottom: 8px; }
+.hint { font-size: 12px; color: #555; text-align: center; margin: 5px 0 10px; }
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.controls label { font-size: 13px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+button { font-size: 12px; padding: 4px 10px; background: #1a1a2e; color: #ccc;
+         border: 1px solid #444; border-radius: 4px; cursor: pointer; }
+button:hover { background: #252540; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+th { text-align: left; padding: 5px 8px; color: #888; border-bottom: 1px solid #333; }
+td { padding: 4px 8px; border-bottom: 1px solid #1a1a2a; font-family: monospace; font-size: 12px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+</style></head><body>
+<h1>Solar system &mdash; 31/5/2026</h1>
+<canvas id='c'></canvas>
+<p class='hint'>Drag to rotate &nbsp;&middot;&nbsp; scroll to zoom</p>
+<div class='controls'>
+  <button onclick='resetView()'>Reset view</button>
+  <label><input type='checkbox' id='chkLbl' checked onchange='render()'> Labels</label>
+  <label style='margin-left:auto'>Scale&nbsp;<input type='range' id='sc' min='5' max='80' value='25' style='width:90px' oninput='render()'></label>
+</div>
+<table><thead><tr><th>Planet</th><th>X (AU)</th><th>Y (AU)</th><th>Z (AU)</th><th>|r| (AU)</th></tr></thead><tbody>
+<tr><td><span class='dot' style='background:#b5b5b5'></span>Mercury</td><td>-0.329149</td><td>0.134801</td><td>0.041211</td><td>0.358062</td></tr>
+<tr><td><span class='dot' style='background:#e8c97a'></span>Venus</td><td>-0.673099</td><td>0.249214</td><td>0.042306</td><td>0.718999</td></tr>
+<tr><td><span class='dot' style='background:#4fa3e0'></span>EM Bary</td><td>-0.335823</td><td>-0.956823</td><td>0.000070</td><td>1.014045</td></tr>
+<tr><td><span class='dot' style='background:#c1440e'></span>Mars</td><td>1.342173</td><td>0.438634</td><td>-0.023859</td><td>1.412231</td></tr>
+<tr><td><span class='dot' style='background:#c88b3a'></span>Jupiter</td><td>-2.740867</td><td>4.495357</td><td>0.042829</td><td>5.265209</td></tr>
+<tr><td><span class='dot' style='background:#e4d191'></span>Saturn</td><td>9.409218</td><td>1.082092</td><td>-0.394703</td><td>9.479456</td></tr>
+<tr><td><span class='dot' style='background:#7de8e8'></span>Uranus</td><td>9.048872</td><td>17.228284</td><td>-0.053154</td><td>19.460182</td></tr>
+<tr><td><span class='dot' style='background:#4b70dd'></span>Neptune</td><td>29.864854</td><td>0.619371</td><td>-0.700954</td><td>29.879499</td></tr>
+<tr><td><span class='dot' style='background:#aaaaaa'></span>Pluto</td><td>19.653007</td><td>-29.496111</td><td>-2.528884</td><td>35.533878</td></tr>
+</tbody></table>
+<script>
+const planets = [
+  {name:'Mercury', x:-0.32914888, y:0.13480076, z:0.04121131, col:'#b5b5b5'},
+  {name:'Venus', x:-0.67309895, y:0.24921406, z:0.04230566, col:'#e8c97a'},
+  {name:'EM Bary', x:-0.33582293, y:-0.95682294, z:0.00006994, col:'#4fa3e0'},
+  {name:'Mars', x:1.34217297, y:0.43863448, z:-0.02385918, col:'#c1440e'},
+  {name:'Jupiter', x:-2.74086679, y:4.49535717, z:0.04282943, col:'#c88b3a'},
+  {name:'Saturn', x:9.40921793, y:1.08209207, z:-0.39470257, col:'#e4d191'},
+  {name:'Uranus', x:9.04887205, y:17.22828415, z:-0.05315425, col:'#7de8e8'},
+  {name:'Neptune', x:29.86485416, y:0.61937094, z:-0.70095371, col:'#4b70dd'},
+  {name:'Pluto', x:19.65300694, y:-29.49611113, z:-2.52888401, col:'#aaaaaa'},
+];
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+ 
+// ---------- matrix helpers ----------
+// Rotation is stored as a flat 9-element row-major 3x3 matrix.
+// Every drag event premultiplies in WORLD space:
+//   R = Rx(dy) * Ry(dx) * R
+// Left/right drag is always a pure Y-axis yaw.
+// Up/down   drag is always a pure X-axis pitch.
+// Because we work in world space, axes never drift -> no roll.
+ 
+function mat3Identity() { return [1,0,0, 0,1,0, 0,0,1]; }
+ 
+function mat3Mul(A, B) {
+  const C = new Array(9);
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++)
+      C[r*3+c] = A[r*3]*B[c] + A[r*3+1]*B[3+c] + A[r*3+2]*B[6+c];
+  return C;
+}
+ 
+function mat3RotY(a) {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [c,0,s, 0,1,0, -s,0,c];
+}
+ 
+function mat3RotX(a) {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [1,0,0, 0,c,-s, 0,s,c];
+}
+ 
+function applyR(M, x, y, z) {
+  return {
+    x: M[0]*x + M[1]*y + M[2]*z,
+    y: M[3]*x + M[4]*y + M[5]*z,
+    z: M[6]*x + M[7]*y + M[8]*z
+  };
+}
+// ------------------------------------
+ 
+let R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));   // initial view: slight top-down tilt
+let drag = false, lx = 0, ly = 0;
+ 
+function proj(x, y, z, cx, cy, sc) {
+  const v = applyR(R, x, y, z);
+  return { sx: cx + v.x * sc, sy: cy - v.y * sc, depth: v.z };
+}
+ 
+function render() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  ctx.scale(dpr, dpr);
+  const sc  = +document.getElementById('sc').value;
+  const lbl = document.getElementById('chkLbl').checked;
+  const cx = W/2, cy = H/2;
+ 
+  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0,0,W,H);
+ 
+  const sun = proj(0,0,0,cx,cy,sc);
+  ctx.beginPath(); ctx.arc(sun.sx,sun.sy,7,0,Math.PI*2);
+  ctx.fillStyle = '#ffd966'; ctx.fill();
+  if (lbl) {
+    ctx.fillStyle='#ffd966'; ctx.font='500 12px sans-serif';
+    ctx.fillText('Sun', sun.sx+9, sun.sy+4);
+  }
+ 
+  const projected = planets.map(p => ({
+    ...p,
+    pt: proj(p.x, p.y, p.z, cx, cy, sc)
+  })).sort((a,b) => b.pt.depth - a.pt.depth);
+ 
+  projected.forEach(p => {
+    const r  = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+    const dr = Math.max(3, Math.min(7, 2 + r*0.3));
+    const s0 = proj(0,0,0,cx,cy,sc);
+ 
+    ctx.strokeStyle = p.col+'33'; ctx.lineWidth=0.5; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(s0.sx,s0.sy); ctx.lineTo(p.pt.sx,p.pt.sy); ctx.stroke();
+ 
+    ctx.beginPath(); ctx.arc(p.pt.sx,p.pt.sy,dr,0,Math.PI*2);
+    ctx.fillStyle=p.col; ctx.fill();
+ 
+    if (lbl) {
+      ctx.fillStyle=p.col; ctx.font='500 12px sans-serif';
+      ctx.fillText(p.name, p.pt.sx+dr+3, p.pt.sy+4);
+      ctx.fillStyle='rgba(200,200,200,0.45)'; ctx.font='11px monospace';
+      ctx.fillText(r.toFixed(3)+' AU', p.pt.sx+dr+3, p.pt.sy+16);
+    }
+  });
+}
+ 
+function resetView() {
+  R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));
+  document.getElementById('sc').value = 25;
+  render();
+}
+ 
+canvas.addEventListener('mousedown', e => { drag=true; lx=e.clientX; ly=e.clientY; });
+window.addEventListener('mouseup',   ()  => { drag=false; });
+window.addEventListener('mousemove', e  => {
+  if (!drag) return;
+  const dx = (e.clientX-lx)*0.008;   // left/right  -> world Y yaw
+  const dy = (e.clientY-ly)*0.008;   // up/down     -> world X pitch
+  lx=e.clientX; ly=e.clientY;
+  // Premultiply in world space: axes stay fixed regardless of current orientation
+  R = mat3Mul(mat3Mul(mat3RotX(dy), mat3RotY(dx)), R);
+  render();
+});
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const s = document.getElementById('sc');
+  s.value = Math.max(5, Math.min(80, +s.value - e.deltaY*0.04));
+  render();
+}, {passive:false});
+ 
+window.addEventListener('resize', render);
+render();
+</script>
+</body></html>
