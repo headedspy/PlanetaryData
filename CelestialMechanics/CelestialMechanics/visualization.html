@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>
-<title>Solar system - 31/5/2026</title>
+<title>Solar system - 7/5/2001</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0a0a14; color: #ccc; font-family: sans-serif; padding: 12px; }
@@ -18,155 +18,197 @@ th { text-align: left; padding: 5px 8px; color: #888; border-bottom: 1px solid #
 td { padding: 4px 8px; border-bottom: 1px solid #1a1a2a; font-family: monospace; font-size: 12px; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 </style></head><body>
-<h1>Solar system &mdash; 31/5/2026</h1>
+<h1>Solar system &mdash; 7/5/2001</h1>
 <canvas id='c'></canvas>
 <p class='hint'>Drag to rotate &nbsp;&middot;&nbsp; scroll to zoom</p>
 <div class='controls'>
   <button onclick='resetView()'>Reset view</button>
   <label><input type='checkbox' id='chkLbl' checked onchange='render()'> Labels</label>
-  <label style='margin-left:auto'>Scale&nbsp;<input type='range' id='sc' min='5' max='80' value='25' style='width:90px' oninput='render()'></label>
+  <label><input type='checkbox' id='chkOrb' checked onchange='render()'> Orbits</label>
+  <label style='margin-left:auto'>Scale&nbsp;<input type='range' id='sc' min='2' max='400' value='25' style='width:90px' oninput='render()'></label>
 </div>
-<table><thead><tr><th>Planet</th><th>X (AU)</th><th>Y (AU)</th><th>Z (AU)</th><th>|r| (AU)</th></tr></thead><tbody>
-<tr><td><span class='dot' style='background:#b5b5b5'></span>Mercury</td><td>-0.329149</td><td>0.134801</td><td>0.041211</td><td>0.358062</td></tr>
-<tr><td><span class='dot' style='background:#e8c97a'></span>Venus</td><td>-0.673099</td><td>0.249214</td><td>0.042306</td><td>0.718999</td></tr>
-<tr><td><span class='dot' style='background:#4fa3e0'></span>EM Bary</td><td>-0.335823</td><td>-0.956823</td><td>0.000070</td><td>1.014045</td></tr>
-<tr><td><span class='dot' style='background:#c1440e'></span>Mars</td><td>1.342173</td><td>0.438634</td><td>-0.023859</td><td>1.412231</td></tr>
-<tr><td><span class='dot' style='background:#c88b3a'></span>Jupiter</td><td>-2.740867</td><td>4.495357</td><td>0.042829</td><td>5.265209</td></tr>
-<tr><td><span class='dot' style='background:#e4d191'></span>Saturn</td><td>9.409218</td><td>1.082092</td><td>-0.394703</td><td>9.479456</td></tr>
-<tr><td><span class='dot' style='background:#7de8e8'></span>Uranus</td><td>9.048872</td><td>17.228284</td><td>-0.053154</td><td>19.460182</td></tr>
-<tr><td><span class='dot' style='background:#4b70dd'></span>Neptune</td><td>29.864854</td><td>0.619371</td><td>-0.700954</td><td>29.879499</td></tr>
-<tr><td><span class='dot' style='background:#aaaaaa'></span>Pluto</td><td>19.653007</td><td>-29.496111</td><td>-2.528884</td><td>35.533878</td></tr>
+<table><thead><tr><th>Planet</th><th>X (AU)</th><th>Y (AU)</th><th>Z (AU)</th><th>|r| (AU)</th><th>mass (M&#x2609;/M)</th><th>n (rad/yr)</th></tr></thead><tbody>
+<tr><td><span class='dot' style='background:#b5b5b5'></span>Mercury</td><td>-0.188039</td><td>0.263466</td><td>0.038783</td><td>0.326002</td><td>6023600.00</td><td>4.152101</td></tr>
+<tr><td><span class='dot' style='background:#e8c97a'></span>Venus</td><td>-0.218186</td><td>-0.692218</td><td>0.003129</td><td>0.725796</td><td>408523.71</td><td>1.625563</td></tr>
+<tr><td><span class='dot' style='background:#4fa3e0'></span>EM Bary</td><td>-0.676034</td><td>-0.749593</td><td>0.000010</td><td>1.009412</td><td>328900.56</td><td>1.000001</td></tr>
+<tr><td><span class='dot' style='background:#c1440e'></span>Mars</td><td>-0.687547</td><td>-1.353194</td><td>-0.011335</td><td>1.517888</td><td>3098708.00</td><td>0.531674</td></tr>
+<tr><td><span class='dot' style='background:#c88b3a'></span>Jupiter</td><td>0.856690</td><td>5.017078</td><td>-0.039431</td><td>5.089847</td><td>1047.35</td><td>0.084312</td></tr>
+<tr><td><span class='dot' style='background:#e4d191'></span>Saturn</td><td>4.032568</td><td>8.121887</td><td>-0.302778</td><td>9.072944</td><td>3497.90</td><td>0.033934</td></tr>
+<tr><td><span class='dot' style='background:#7de8e8'></span>Uranus</td><td>15.880958</td><td>-12.085504</td><td>-0.250963</td><td>19.958137</td><td>22902.98</td><td>0.011898</td></tr>
+<tr><td><span class='dot' style='background:#4b70dd'></span>Neptune</td><td>17.771632</td><td>-24.313692</td><td>0.091176</td><td>30.116355</td><td>19412.24</td><td>0.006065</td></tr>
+<tr><td><span class='dot' style='background:#aaaaaa'></span>Pluto</td><td>-8.355203</td><td>-28.699072</td><td>5.487995</td><td>30.390199</td><td>135200000.00</td><td>0.004030</td></tr>
 </tbody></table>
 <script>
 const planets = [
-  {name:'Mercury', x:-0.32914888, y:0.13480076, z:0.04121131, col:'#b5b5b5'},
-  {name:'Venus', x:-0.67309895, y:0.24921406, z:0.04230566, col:'#e8c97a'},
-  {name:'EM Bary', x:-0.33582293, y:-0.95682294, z:0.00006994, col:'#4fa3e0'},
-  {name:'Mars', x:1.34217297, y:0.43863448, z:-0.02385918, col:'#c1440e'},
-  {name:'Jupiter', x:-2.74086679, y:4.49535717, z:0.04282943, col:'#c88b3a'},
-  {name:'Saturn', x:9.40921793, y:1.08209207, z:-0.39470257, col:'#e4d191'},
-  {name:'Uranus', x:9.04887205, y:17.22828415, z:-0.05315425, col:'#7de8e8'},
-  {name:'Neptune', x:29.86485416, y:0.61937094, z:-0.70095371, col:'#4b70dd'},
-  {name:'Pluto', x:19.65300694, y:-29.49611113, z:-2.52888401, col:'#aaaaaa'},
+  {name:'Mercury', x:-0.18803899, y:0.26346584, z:0.03878349, a:0.38709843, e:0.20563690, w:0.50827306, O:0.84365672, I:0.12226930, col:'#b5b5b5'},
+  {name:'Venus', x:-0.21818555, y:-0.69221780, z:0.00312870, a:0.72332102, e:0.00676330, w:0.96166577, O:1.33812533, I:0.05930247, col:'#e8c97a'},
+  {name:'EM Bary', x:-0.67603448, y:-0.74959297, z:0.00001020, a:1.00000018, e:0.01673114, w:1.88583193, O:-0.08928860, I:-0.00001264, col:'#4fa3e0'},
+  {name:'Mars', x:-0.68754709, y:-1.35319426, z:-0.01133533, a:1.52371244, e:0.09336634, w:-1.28492761, O:0.86759594, I:0.03231863, col:'#c1440e'},
+  {name:'Jupiter', x:0.85668978, y:5.01707790, z:-0.03943129, a:5.20247980, e:0.04853833, w:-1.50128293, O:1.75047072, I:0.02266433, col:'#c88b3a'},
+  {name:'Saturn', x:4.03256773, y:8.12188659, z:-0.30277751, a:9.54149842, e:0.05550392, w:-0.36246888, O:1.98333301, I:0.04353378, col:'#e4d191'},
+  {name:'Uranus', x:15.88095839, y:-12.08550400, z:-0.25096292, a:19.18797672, e:0.04685719, w:1.71866094, O:1.29090271, I:0.01349064, col:'#7de8e8'},
+  {name:'Neptune', x:17.77163230, y:-24.31369226, z:0.09117554, a:30.06952839, e:0.00895450, w:-1.48535466, O:2.30010444, I:0.03089334, col:'#4b70dd'},
+  {name:'Pluto', x:-8.35520296, y:-28.69907173, z:5.48799453, a:39.48692106, e:0.24885319, w:1.98610309, O:1.92512558, I:0.29916763, col:'#aaaaaa'},
 ];
 
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
+		const canvas = document.getElementById('c');
+		const ctx    = canvas.getContext('2d');
  
-// ---------- matrix helpers ----------
-// Rotation is stored as a flat 9-element row-major 3x3 matrix.
-// Every drag event premultiplies in WORLD space:
-//   R = Rx(dy) * Ry(dx) * R
-// Left/right drag is always a pure Y-axis yaw.
-// Up/down   drag is always a pure X-axis pitch.
-// Because we work in world space, axes never drift -> no roll.
+		// ---------- matrix helpers ----------
+		// Rotation is stored as a flat 9-element row-major 3x3 matrix.
+		// Every drag event premultiplies in WORLD space:
+		//   R = Rx(dy) * Ry(dx) * R
+		// Left/right drag is always a pure Y-axis yaw.
+		// Up/down   drag is always a pure X-axis pitch.
+		// Because we work in world space, axes never drift -> no roll.
  
-function mat3Identity() { return [1,0,0, 0,1,0, 0,0,1]; }
+		function mat3Identity() { return [1,0,0, 0,1,0, 0,0,1]; }
  
-function mat3Mul(A, B) {
-  const C = new Array(9);
-  for (let r = 0; r < 3; r++)
-    for (let c = 0; c < 3; c++)
-      C[r*3+c] = A[r*3]*B[c] + A[r*3+1]*B[3+c] + A[r*3+2]*B[6+c];
-  return C;
-}
+		function mat3Mul(A, B) {
+		  const C = new Array(9);
+		  for (let r = 0; r < 3; r++)
+			for (let c = 0; c < 3; c++)
+			  C[r*3+c] = A[r*3]*B[c] + A[r*3+1]*B[3+c] + A[r*3+2]*B[6+c];
+		  return C;
+		}
  
-function mat3RotY(a) {
-  const c = Math.cos(a), s = Math.sin(a);
-  return [c,0,s, 0,1,0, -s,0,c];
-}
+		function mat3RotY(a) {
+		  const c = Math.cos(a), s = Math.sin(a);
+		  return [c,0,s, 0,1,0, -s,0,c];
+		}
  
-function mat3RotX(a) {
-  const c = Math.cos(a), s = Math.sin(a);
-  return [1,0,0, 0,c,-s, 0,s,c];
-}
+		function mat3RotX(a) {
+		  const c = Math.cos(a), s = Math.sin(a);
+		  return [1,0,0, 0,c,-s, 0,s,c];
+		}
  
-function applyR(M, x, y, z) {
-  return {
-    x: M[0]*x + M[1]*y + M[2]*z,
-    y: M[3]*x + M[4]*y + M[5]*z,
-    z: M[6]*x + M[7]*y + M[8]*z
-  };
-}
-// ------------------------------------
+		function applyR(M, x, y, z) {
+		  return {
+			x: M[0]*x + M[1]*y + M[2]*z,
+			y: M[3]*x + M[4]*y + M[5]*z,
+			z: M[6]*x + M[7]*y + M[8]*z
+		  };
+		}
+		// ------------------------------------
  
-let R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));   // initial view: slight top-down tilt
-let drag = false, lx = 0, ly = 0;
+		// Compute 360 3-D points along a Keplerian ellipse.
+		// Uses the same rotation as the position formula in main.cpp:
+		//   x = R11*xkep + R12*ykep,  y = R21*xkep + R22*ykep,  z = R31*xkep + R32*ykep
+		// where xkep = a*(cosE - e), ykep = a*sqrt(1-e^2)*sinE
+		function orbitPoints(a, e, w, O, I) {
+		  const pts = [];
+		  const cosw = Math.cos(w), sinw = Math.sin(w);
+		  const cosO = Math.cos(O), sinO = Math.sin(O);
+		  const cosI = Math.cos(I), sinI = Math.sin(I);
+		  const b = a * Math.sqrt(1 - e * e);
+		  const N = 180;
+		  for (let k = 0; k <= N; k++) {
+			const E = (2 * Math.PI * k) / N;
+			const xk = a * (Math.cos(E) - e);
+			const yk = b * Math.sin(E);
+			const px = (cosw*cosO - sinw*sinO*cosI)*xk + (-sinw*cosO - cosw*sinO*cosI)*yk;
+			const py = (cosw*sinO + sinw*cosO*cosI)*xk + (-sinw*sinO + cosw*cosO*cosI)*yk;
+			const pz = (sinw*sinI)*xk + (cosw*sinI)*yk;
+			pts.push([px, py, pz]);
+		  }
+		  return pts;
+		}
  
-function proj(x, y, z, cx, cy, sc) {
-  const v = applyR(R, x, y, z);
-  return { sx: cx + v.x * sc, sy: cy - v.y * sc, depth: v.z };
-}
+		let R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));   // initial view: slight top-down tilt
+		let drag = false, lx = 0, ly = 0;
  
-function render() {
-  const dpr = window.devicePixelRatio || 1;
-  const W = canvas.clientWidth, H = canvas.clientHeight;
-  canvas.width = W*dpr; canvas.height = H*dpr;
-  ctx.scale(dpr, dpr);
-  const sc  = +document.getElementById('sc').value;
-  const lbl = document.getElementById('chkLbl').checked;
-  const cx = W/2, cy = H/2;
+		function proj(x, y, z, cx, cy, sc) {
+		  const v = applyR(R, x, y, z);
+		  return { sx: cx + v.x * sc, sy: cy - v.y * sc, depth: v.z };
+		}
  
-  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0,0,W,H);
+		function render() {
+		  const dpr = window.devicePixelRatio || 1;
+		  const W = canvas.clientWidth, H = canvas.clientHeight;
+		  canvas.width = W*dpr; canvas.height = H*dpr;
+		  ctx.scale(dpr, dpr);
+		  const sc  = +document.getElementById('sc').value;
+		  const lbl = document.getElementById('chkLbl').checked;
+		  const orb = document.getElementById('chkOrb').checked;
+		  const cx = W/2, cy = H/2;
  
-  const sun = proj(0,0,0,cx,cy,sc);
-  ctx.beginPath(); ctx.arc(sun.sx,sun.sy,7,0,Math.PI*2);
-  ctx.fillStyle = '#ffd966'; ctx.fill();
-  if (lbl) {
-    ctx.fillStyle='#ffd966'; ctx.font='500 12px sans-serif';
-    ctx.fillText('Sun', sun.sx+9, sun.sy+4);
-  }
+		  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0,0,W,H);
  
-  const projected = planets.map(p => ({
-    ...p,
-    pt: proj(p.x, p.y, p.z, cx, cy, sc)
-  })).sort((a,b) => b.pt.depth - a.pt.depth);
+		  // Draw orbits first (behind everything)
+		  if (orb) {
+			planets.forEach(p => {
+			  const pts = orbitPoints(p.a, p.e, p.w, p.O, p.I);
+			  ctx.strokeStyle = p.col + '55'; ctx.lineWidth = 0.7; ctx.setLineDash([]);
+			  ctx.beginPath();
+			  pts.forEach(([x,y,z], i) => {
+				const q = proj(x, y, z, cx, cy, sc);
+				i === 0 ? ctx.moveTo(q.sx, q.sy) : ctx.lineTo(q.sx, q.sy);
+			  });
+			  ctx.closePath(); ctx.stroke();
+			});
+		  }
  
-  projected.forEach(p => {
-    const r  = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
-    const dr = Math.max(3, Math.min(7, 2 + r*0.3));
-    const s0 = proj(0,0,0,cx,cy,sc);
+		  const sun = proj(0,0,0,cx,cy,sc);
+		  ctx.beginPath(); ctx.arc(sun.sx,sun.sy,7,0,Math.PI*2);
+		  ctx.fillStyle = '#ffd966'; ctx.fill();
+		  if (lbl) {
+			ctx.fillStyle='#ffd966'; ctx.font='500 12px sans-serif';
+			ctx.fillText('Sun', sun.sx+9, sun.sy+4);
+		  }
  
-    ctx.strokeStyle = p.col+'33'; ctx.lineWidth=0.5; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(s0.sx,s0.sy); ctx.lineTo(p.pt.sx,p.pt.sy); ctx.stroke();
+		  const projected = planets.map(p => ({
+			...p,
+			pt: proj(p.x, p.y, p.z, cx, cy, sc)
+		  })).sort((a,b) => b.pt.depth - a.pt.depth);
  
-    ctx.beginPath(); ctx.arc(p.pt.sx,p.pt.sy,dr,0,Math.PI*2);
-    ctx.fillStyle=p.col; ctx.fill();
+		  projected.forEach(p => {
+			const r  = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
+			const dr = Math.max(3, Math.min(7, 2 + r*0.3));
+			const s0 = proj(0,0,0,cx,cy,sc);
  
-    if (lbl) {
-      ctx.fillStyle=p.col; ctx.font='500 12px sans-serif';
-      ctx.fillText(p.name, p.pt.sx+dr+3, p.pt.sy+4);
-      ctx.fillStyle='rgba(200,200,200,0.45)'; ctx.font='11px monospace';
-      ctx.fillText(r.toFixed(3)+' AU', p.pt.sx+dr+3, p.pt.sy+16);
-    }
-  });
-}
+			ctx.strokeStyle = p.col+'33'; ctx.lineWidth=0.5; ctx.setLineDash([]);
+			ctx.beginPath(); ctx.moveTo(s0.sx,s0.sy); ctx.lineTo(p.pt.sx,p.pt.sy); ctx.stroke();
  
-function resetView() {
-  R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));
-  document.getElementById('sc').value = 25;
-  render();
-}
+			ctx.beginPath(); ctx.arc(p.pt.sx,p.pt.sy,dr,0,Math.PI*2);
+			ctx.fillStyle=p.col; ctx.fill();
  
-canvas.addEventListener('mousedown', e => { drag=true; lx=e.clientX; ly=e.clientY; });
-window.addEventListener('mouseup',   ()  => { drag=false; });
-window.addEventListener('mousemove', e  => {
-  if (!drag) return;
-  const dx = (e.clientX-lx)*0.008;   // left/right  -> world Y yaw
-  const dy = (e.clientY-ly)*0.008;   // up/down     -> world X pitch
-  lx=e.clientX; ly=e.clientY;
-  // Premultiply in world space: axes stay fixed regardless of current orientation
-  R = mat3Mul(mat3Mul(mat3RotX(dy), mat3RotY(dx)), R);
-  render();
-});
-canvas.addEventListener('wheel', e => {
-  e.preventDefault();
-  const s = document.getElementById('sc');
-  s.value = Math.max(5, Math.min(80, +s.value - e.deltaY*0.04));
-  render();
-}, {passive:false});
+			if (lbl) {
+			  ctx.fillStyle=p.col; ctx.font='500 12px sans-serif';
+			  ctx.fillText(p.name, p.pt.sx+dr+3, p.pt.sy+4);
+			  ctx.fillStyle='rgba(200,200,200,0.45)'; ctx.font='11px monospace';
+			  ctx.fillText(r.toFixed(3)+' AU', p.pt.sx+dr+3, p.pt.sy+16);
+			}
+		  });
+		}
  
-window.addEventListener('resize', render);
-render();
-</script>
-</body></html>
+		function resetView() {
+		  R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));
+		  document.getElementById('sc').value = 25;
+		  render();
+		}
+ 
+		canvas.addEventListener('mousedown', e => { drag=true; lx=e.clientX; ly=e.clientY; });
+		window.addEventListener('mouseup',   ()  => { drag=false; });
+		window.addEventListener('mousemove', e  => {
+		  if (!drag) return;
+		  const dx = (e.clientX-lx)*0.008;   // left/right  -> world Y yaw
+		  const dy = (e.clientY-ly)*0.008;   // up/down     -> world X pitch
+		  lx=e.clientX; ly=e.clientY;
+		  // Premultiply in world space: axes stay fixed regardless of current orientation
+		  R = mat3Mul(mat3Mul(mat3RotX(dy), mat3RotY(dx)), R);
+		  render();
+		});
+		canvas.addEventListener('wheel', e => {
+		  e.preventDefault();
+		  const s = document.getElementById('sc');
+		  const current = +s.value;
+		  const delta = e.deltaY * 0.04 * (current / 25);   // proportional speed: faster when zoomed in
+		  s.value = Math.max(2, Math.min(400, current - delta));
+		  render();
+		}, {passive:false});
+ 
+		window.addEventListener('resize', render);
+		render();
+		</script>
+		</body></html>
+	

@@ -28,6 +28,30 @@ struct Planet {
 	double n;
 	double X, Y, Z;
 	double dX, dY, dZ;
+
+	// Delaunay elements  (L,G,Th are momenta; l,g,th are conjugate coordinates)
+	double del_L;    // L     = mu * sqrt(gamma * a)
+	double del_G;    // G     = L  * sqrt(1 - e^2)
+	double del_T;    // Theta = G  * cos(i)
+	double del_l;    // l     = mean anomaly M  (rad)
+	double del_g;    // g     = omega = W - O   (argument of perihelion, rad)
+	double del_t;    // theta = Omega = O       (longitude of asc. node, rad)
+
+	// Poincare first kind  (Lambda,LmG,GmT are momenta; lambda,-varpi,-theta coords)
+	double poi1_Lambda;   // Lambda =  L
+	double poi1_LmG;      // L - G
+	double poi1_GmT;      // G - Theta
+	double poi1_lambda;   // lambda  = l + g + theta  (mean longitude, rad)
+	double poi1_mvarpi;   // -varpi  = -(g + theta)
+	double poi1_mtheta;   // -theta
+
+	// Poincare second kind  (Lambda,xi,p are momenta; lambda,eta,q coords)
+	double poi2_Lambda;   // Lambda =  L
+	double poi2_lambda;   // lambda  = l + g + theta
+	double poi2_xi;       // xi  =  sqrt(2*(L-G)) * cos(g+theta)
+	double poi2_eta;      // eta = -sqrt(2*(L-G)) * sin(g+theta)
+	double poi2_p;        // p   =  sqrt(2*(G-Theta)) * cos(theta)
+	double poi2_q;        // q   = -sqrt(2*(G-Theta)) * sin(theta)
 };
 
 bool isLeap(int year) {
@@ -57,10 +81,7 @@ double calculateEccentricAnomaly(double M, double e, int depth = 10) {
 void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 {
 	ofstream f("visualization.html");
-	if (!f) {
-		cerr << "Cannot write visualization.html\n";
-		return;
-	}
+	if (!f) { cerr << "Cannot write visualization.html\n"; return; }
 
 	auto color = [](const string& n) -> string {
 		if (n == "Mercury")                    return "#b5b5b5";
@@ -72,7 +93,7 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 		if (n == "Uranus")                     return "#7de8e8";
 		if (n == "Neptune")                    return "#4b70dd";
 		return "#aaaaaa";
-	};
+		};
 
 	f << "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>\n";
 	f << "<title>Solar system - " << day << "/" << month << "/" << year << "</title>\n";
@@ -100,30 +121,39 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 	f << "<div class='controls'>\n";
 	f << "  <button onclick='resetView()'>Reset view</button>\n";
 	f << "  <label><input type='checkbox' id='chkLbl' checked onchange='render()'> Labels</label>\n";
-	f << "  <label style='margin-left:auto'>Scale&nbsp;<input type='range' id='sc' min='5' max='80' value='25' style='width:90px' oninput='render()'></label>\n";
+	f << "  <label><input type='checkbox' id='chkOrb' checked onchange='render()'> Orbits</label>\n";
+	f << "  <label style='margin-left:auto'>Scale&nbsp;<input type='range' id='sc' min='2' max='400' value='25' style='width:90px' oninput='render()'></label>\n";
 	f << "</div>\n";
 
-	f << "<table><thead><tr>";
-	f << "<th>Planet</th><th>X (AU)</th><th>Y (AU)</th><th>Z (AU)</th><th>|r| (AU)</th>";
-	f << "</tr></thead><tbody>\n";
-
-	for (const Planet& p : planets)
-	{
+	f << "<table><thead><tr>"
+		<< "<th>Planet</th><th>X (AU)</th><th>Y (AU)</th><th>Z (AU)</th>"
+		<< "<th>|r| (AU)</th><th>mass (M&#x2609;/M)</th><th>n (rad/yr)</th>"
+		<< "</tr></thead><tbody>\n";
+	for (const Planet& p : planets) {
 		double r = sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
 		f << fixed << setprecision(6);
-		f << "<tr><td><span class='dot' style='background:" << color(p.name) << "'></span>";
-		f << p.name << "</td>";
-		f << "<td>" << p.X << "</td><td>" << p.Y << "</td><td>" << p.Z << "</td>";
-		f << "<td>" << r << "</td></tr>\n";
+		f << "<tr><td><span class='dot' style='background:" << color(p.name) << "'></span>"
+			<< p.name << "</td>"
+			<< "<td>" << p.X << "</td><td>" << p.Y << "</td><td>" << p.Z << "</td>"
+			<< "<td>" << r << "</td>"
+			<< setprecision(2)
+			<< "<td>" << p.mass << "</td>"
+			<< setprecision(6)
+			<< "<td>" << p.n << "</td></tr>\n";
 	}
-
 	f << "</tbody></table>\n";
 
 	f << "<script>\nconst planets = [\n";
 	for (const Planet& p : planets) {
 		f << fixed << setprecision(8);
+		// w and O_rad and I_rad are needed in JS to reconstruct the orbit plane
+		double w_rad = (p.W_calc - p.O_calc) * M_PI / 180.0;
+		double O_rad = p.O_calc * M_PI / 180.0;
+		double I_rad = p.I_calc * M_PI / 180.0;
 		f << "  {name:'" << p.name << "'"
 			<< ", x:" << p.X << ", y:" << p.Y << ", z:" << p.Z
+			<< ", a:" << p.a_calc << ", e:" << p.e_calc
+			<< ", w:" << w_rad << ", O:" << O_rad << ", I:" << I_rad
 			<< ", col:'" << color(p.name) << "'},\n";
 	}
 	f << "];\n";
@@ -133,12 +163,12 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 		const ctx    = canvas.getContext('2d');
  
 		// ---------- matrix helpers ----------
-		// rotation is stored as a flat 9-element row-major 3x3 matrix
-		// eEvery drag event premultiplies in world space
+		// Rotation is stored as a flat 9-element row-major 3x3 matrix.
+		// Every drag event premultiplies in WORLD space:
 		//   R = Rx(dy) * Ry(dx) * R
-		// left-right -> pure Y
-		// up-down -> pure X
-		// world space, axes never drift -> no roll.
+		// Left/right drag is always a pure Y-axis yaw.
+		// Up/down   drag is always a pure X-axis pitch.
+		// Because we work in world space, axes never drift -> no roll.
  
 		function mat3Identity() { return [1,0,0, 0,1,0, 0,0,1]; }
  
@@ -169,6 +199,29 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 		}
 		// ------------------------------------
  
+		// Compute 360 3-D points along a Keplerian ellipse.
+		// Uses the same rotation as the position formula in main.cpp:
+		//   x = R11*xkep + R12*ykep,  y = R21*xkep + R22*ykep,  z = R31*xkep + R32*ykep
+		// where xkep = a*(cosE - e), ykep = a*sqrt(1-e^2)*sinE
+		function orbitPoints(a, e, w, O, I) {
+		  const pts = [];
+		  const cosw = Math.cos(w), sinw = Math.sin(w);
+		  const cosO = Math.cos(O), sinO = Math.sin(O);
+		  const cosI = Math.cos(I), sinI = Math.sin(I);
+		  const b = a * Math.sqrt(1 - e * e);
+		  const N = 180;
+		  for (let k = 0; k <= N; k++) {
+			const E = (2 * Math.PI * k) / N;
+			const xk = a * (Math.cos(E) - e);
+			const yk = b * Math.sin(E);
+			const px = (cosw*cosO - sinw*sinO*cosI)*xk + (-sinw*cosO - cosw*sinO*cosI)*yk;
+			const py = (cosw*sinO + sinw*cosO*cosI)*xk + (-sinw*sinO + cosw*cosO*cosI)*yk;
+			const pz = (sinw*sinI)*xk + (cosw*sinI)*yk;
+			pts.push([px, py, pz]);
+		  }
+		  return pts;
+		}
+ 
 		let R = mat3Mul(mat3RotX(0.4), mat3RotY(0.5));   // initial view: slight top-down tilt
 		let drag = false, lx = 0, ly = 0;
  
@@ -184,9 +237,24 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 		  ctx.scale(dpr, dpr);
 		  const sc  = +document.getElementById('sc').value;
 		  const lbl = document.getElementById('chkLbl').checked;
+		  const orb = document.getElementById('chkOrb').checked;
 		  const cx = W/2, cy = H/2;
  
 		  ctx.fillStyle = '#0a0a14'; ctx.fillRect(0,0,W,H);
+ 
+		  // Draw orbits first (behind everything)
+		  if (orb) {
+			planets.forEach(p => {
+			  const pts = orbitPoints(p.a, p.e, p.w, p.O, p.I);
+			  ctx.strokeStyle = p.col + '55'; ctx.lineWidth = 0.7; ctx.setLineDash([]);
+			  ctx.beginPath();
+			  pts.forEach(([x,y,z], i) => {
+				const q = proj(x, y, z, cx, cy, sc);
+				i === 0 ? ctx.moveTo(q.sx, q.sy) : ctx.lineTo(q.sx, q.sy);
+			  });
+			  ctx.closePath(); ctx.stroke();
+			});
+		  }
  
 		  const sun = proj(0,0,0,cx,cy,sc);
 		  ctx.beginPath(); ctx.arc(sun.sx,sun.sy,7,0,Math.PI*2);
@@ -241,7 +309,9 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 		canvas.addEventListener('wheel', e => {
 		  e.preventDefault();
 		  const s = document.getElementById('sc');
-		  s.value = Math.max(5, Math.min(80, +s.value - e.deltaY*0.04));
+		  const current = +s.value;
+		  const delta = e.deltaY * 0.04 * (current / 25);   // proportional speed: faster when zoomed in
+		  s.value = Math.max(2, Math.min(400, current - delta));
 		  render();
 		}, {passive:false});
  
@@ -354,7 +424,7 @@ int main()
 		p.Y = (cos(w) * sin(O_rad) + sin(w) * cos(O_rad) * cos(I_rad)) * X_kep + (-sin(w) * sin(O_rad) + cos(w) * cos(O_rad) * cos(I_rad)) * Y_kep;
 		p.Z = (sin(w) * sin(I_rad)) * X_kep + (cos(w) * sin(I_rad)) * Y_kep;
 
-		double m = 1 / p.mass;
+		double m = 1.0 / p.mass;
 		p.n = sqrt((1 + m) / (pow(p.a_calc, 3))); // mean movement
 
 		// Kepler speed
@@ -366,6 +436,41 @@ int main()
 		p.dX = (((cos(w) * cos(O_rad)) - (sin(w) * sin(O_rad) * cos(I_rad))) * dX_kep) + (((-sin(w) * cos(O_rad)) - (-cos(w) * sin(O_rad) * cos(I_rad))) * dY_kep);
 		p.dY = (((cos(w) * sin(O_rad)) + (sin(w) * cos(O_rad) * cos(I_rad))) * dX_kep) + (((-sin(w) * sin(O_rad)) + (-cos(w) * cos(O_rad) * cos(I_rad))) * dY_kep);
 		p.dZ = ((sin(w) * sin(I_rad)) * dX_kep) + ((cos(w) * sin(I_rad)) * dY_kep);
+
+		// Delaunay
+		double gamma = 1.0 + m; // (gravitational correction)
+
+		p.del_L = m * sqrt(gamma * p.a_calc);
+		p.del_G = p.del_L * sqrt(1.0 - (p.e_calc * p.e_calc));
+		p.del_T = p.del_G * cos(I_rad);          // I_rad already in radians
+		p.del_l = M;                             // mean anomaly (rad), computed above
+		p.del_g = w;                             // omega = W - O  (rad), computed above
+		p.del_t = O_rad;                         // Omega = O  (rad), computed above
+
+		// Poincare first kind
+		// Momenta:  Lambda, L-G, G-Theta
+		// Coords:   lambda = l+g+theta,  -varpi = -(g+theta),  -theta
+
+		p.poi1_Lambda = p.del_L;
+		p.poi1_LmG = p.del_L - p.del_G;
+		p.poi1_GmT = p.del_G - p.del_T;
+		p.poi1_lambda = p.del_l + p.del_g + p.del_t;
+		p.poi1_mvarpi = -p.del_g - p.del_t;
+		p.poi1_mtheta = -p.del_t;
+
+
+		// Poincare second kind
+		// xi  =  sqrt(2*(L-G)) * cos(g+theta)
+		// eta = -sqrt(2*(L-G)) * sin(g+theta)
+		// p  =  sqrt(2*(G-Theta)) * cos(theta)
+		// q   = -sqrt(2*(G-Theta)) * sin(theta)
+
+		p.poi2_Lambda = p.del_L;
+		p.poi2_lambda = p.del_l + p.del_g + p.del_t;
+		p.poi2_xi = sqrt(2.0 * (p.del_L - p.del_G)) * cos(p.del_g + p.del_t);
+		p.poi2_eta = -sqrt(2.0 * (p.del_L - p.del_G)) * sin(p.del_g + p.del_t);
+		p.poi2_p = sqrt(2.0 * (p.del_G - p.del_T)) * cos(p.del_t);
+		p.poi2_q = -sqrt(2.0 * (p.del_G - p.del_T)) * sin(p.del_t);
 	}
 
 	cout << string(115, '=') << "\n";
@@ -422,6 +527,82 @@ int main()
 			<< setw(12) << p.dY
 			<< setw(12) << p.dZ
 			<< endl;
+	}
+
+	cout << endl << endl;
+
+	// ---- Delaunay table ----
+	const int SW = 18;  // column width for scientific notation (e.g. " 1.234567e-06")
+	cout << string(10 + SW * 6, '=') << "\n";
+	cout << "Delaunay elements\n";
+	cout << string(10 + SW * 6, '-') << "\n";
+	cout << left << setw(10) << "Planet"
+		<< right << setw(SW) << "L"
+		<< setw(SW) << "G"
+		<< setw(SW) << "THETA"
+		<< setw(SW) << "l (rad)"
+		<< setw(SW) << "g (rad)"
+		<< setw(SW) << "theta (rad)" << "\n";
+	cout << string(10 + SW * 6, '-') << "\n";
+	for (const Planet& p : planets) {
+		cout << left << setw(10) << p.name
+			<< right << scientific << setprecision(6)
+			<< setw(SW) << p.del_L
+			<< setw(SW) << p.del_G
+			<< setw(SW) << p.del_T
+			<< setw(SW) << p.del_l
+			<< setw(SW) << p.del_g
+			<< setw(SW) << p.del_t << "\n";
+	}
+
+	cout << endl << endl;
+
+	// ---- Poincare first kind table ----
+	cout << string(10 + SW * 6, '=') << "\n";
+	cout << "Poincare elements - first kind\n";
+	cout << string(10 + SW * 6, '-') << "\n";
+	cout << left << setw(10) << "Planet"
+		<< right << setw(SW) << "Lambda"
+		<< setw(SW) << "L-G"
+		<< setw(SW) << "G-Theta"
+		<< setw(SW) << "lambda"
+		<< setw(SW) << "-varpi"
+		<< setw(SW) << "-theta" << "\n";
+	cout << string(10 + SW * 6, '-') << "\n";
+	for (const Planet& p : planets) {
+		cout << left << setw(10) << p.name
+			<< right << scientific << setprecision(6)
+			<< setw(SW) << p.poi1_Lambda
+			<< setw(SW) << p.poi1_LmG
+			<< setw(SW) << p.poi1_GmT
+			<< setw(SW) << p.poi1_lambda
+			<< setw(SW) << p.poi1_mvarpi
+			<< setw(SW) << p.poi1_mtheta << "\n";
+	}
+
+	cout << endl << endl;
+
+	// ---- Poincare second kind table ----
+	cout << string(10 + SW * 6, '=') << "\n";
+	cout << "Poincare elements - second kind\n";
+	cout << string(10 + SW * 6, '-') << "\n";
+	cout << left << setw(10) << "Planet"
+		<< right << setw(SW) << "Lambda"
+		<< setw(SW) << "lambda"
+		<< setw(SW) << "xi"
+		<< setw(SW) << "eta"
+		<< setw(SW) << "p"
+		<< setw(SW) << "q" << "\n";
+	cout << string(10 + SW * 6, '-') << "\n";
+	for (const Planet& p : planets) {
+		cout << left << setw(10) << p.name
+			<< right << scientific << setprecision(6)
+			<< setw(SW) << p.poi2_Lambda
+			<< setw(SW) << p.poi2_lambda
+			<< setw(SW) << p.poi2_xi
+			<< setw(SW) << p.poi2_eta
+			<< setw(SW) << p.poi2_p
+			<< setw(SW) << p.poi2_q << "\n";
 	}
 
 	writeHTML(planets, day, month, year);
