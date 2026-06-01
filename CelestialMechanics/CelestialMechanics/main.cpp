@@ -329,16 +329,14 @@ int main()
 {
 	int day, month, year;
 
-	cout << "Enter Day of birth:" << endl;
+	cout << "Enter Day:" << endl;
 	cin >> day;
 
-	cout << "Enter Month of birth:" << endl;
+	cout << "Enter Month:" << endl;
 	cin >> month;
 
-	cout << "Enter Year of birth:" << endl;
+	cout << "Enter Year:" << endl;
 	cin >> year;
-
-
 
 	int daysInMonth[] = { 31, isLeap(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	int totalDays = 0;
