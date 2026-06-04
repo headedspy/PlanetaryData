@@ -127,7 +127,7 @@ void writeHTML(const vector<Planet>& planets, int day, int month, int year)
 
 	f << "<table><thead><tr>"
 		<< "<th>Planet</th><th>X (AU)</th><th>Y (AU)</th><th>Z (AU)</th>"
-		<< "<th>|r| (AU)</th><th>mass (M&#x2609;/M)</th><th>n (rad/yr)</th>"
+		<< "<th>|r| (AU)</th><th>mass (M&#x2609;/M)</th><th>n </th>"
 		<< "</tr></thead><tbody>\n";
 	for (const Planet& p : planets) {
 		double r = sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
@@ -350,7 +350,6 @@ int main()
 	for (int m = 0; m < month - 1; m++) {
 		totalDays += daysInMonth[m];
 	}
-	 
 
 	//add days
 	totalDays += day;
@@ -502,17 +501,19 @@ int main()
 
 	cout << endl << endl;
 
-	cout << string(85, '=') << "\n";
+	cout << string(110, '=') << "\n";
 	cout << left << setw(12) << "Planet"
 		<< right
 		<< setw(10) << "X"
 		<< setw(12) << "Y"
 		<< setw(12) << "Z"
+		<< setw(12) << "|r|"
 		<< setw(12) << "dX"
 		<< setw(12) << "dY"
 		<< setw(12) << "dZ"
+		<< setw(12) << "|v|"
 		<< endl;
-	cout << string(85, '-') << "\n";
+	cout << string(110, '-') << "\n";
 
 	for (Planet& p : planets)
 	{
@@ -521,9 +522,11 @@ int main()
 			<< setw(12) << p.X
 			<< setw(12) << p.Y
 			<< setw(12) << p.Z
+			<< setw(12) << sqrt((p.X * p.X) + (p.Y * p.Y) + (p.Z * p.Z))
 			<< setw(12) << p.dX
 			<< setw(12) << p.dY
 			<< setw(12) << p.dZ
+			<< setw(12) << sqrt((p.dX * p.dX) + (p.dY * p.dY) + (p.dZ * p.dZ))
 			<< endl;
 	}
 
