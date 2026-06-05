@@ -2,41 +2,59 @@
 
 Celestial mechanics project
 - run main.cpp
-- input birth date
-- data for each planet's orbital elements and decart positions/velocity vectors is given as an output:
+- input date
+- data for each planet's orbital element is given as an output:
+#
+<img width="927" height="227" alt="image" src="https://github.com/user-attachments/assets/4f6cdd8c-576f-49e6-ad10-1393c173297d" />
 
+> a - semi-major axis
+> 
+> e - eccentricity
+> 
+> I - inclination
+> 
+> L - mean longitude
+> 
+> W - longitude of perihelion
+> 
+> O - longitude of asc. node
+> 
+> m - planetary mass (M_sun/M_planet [mass^-1])
+> 
+> n - mean movement
 
+#
+<img width="887" height="196" alt="image" src="https://github.com/user-attachments/assets/1b8f5c8f-642b-4ffc-9afc-7e28c72ae7df" />
 
-| Metric                          |    Value |
-| ------------------------------- | -------: |
-| Days since J2000.0 (2000-01-01) |       28 |
-| Julian Centuries since J2000.0  | 0.000767 |
+> (X, Y, Z) - Decart coordinates
+> 
+> |r| - Absolute coordinates
+> 
 
-Orbital Elements
+> (dX, dY, dZ) - Speed vector
+> 
+> |v| - Absolute speed
+#
 
-| Planet  |    a (AU) |        e |     I (°) |      L (°) |     ω̄ (°) |      Ω (°) |       m (M☉⁻¹) |        n |
-| ------- | --------: | -------: | --------: | ---------: | ---------: | ---------: | -------------: | -------: |
-| Mercury |  0.387098 | 0.205637 |  7.005590 | 366.837154 |  77.457841 |  48.339525 |   6,023,600.00 | 4.152101 |
-| Venus   |  0.723321 | 0.006764 |  3.397776 | 226.839362 | 131.767601 |  76.672406 |     408,523.71 | 1.625563 |
-| EM Bary |  1.000000 | 0.016732 | -0.000554 | 128.063971 | 102.930303 |  -5.112789 |     328,900.56 | 1.000001 |
-| Mars    |  1.523712 | 0.093365 |  1.851813 |  10.104788 | -23.917101 |  49.713004 |   3,098,708.00 | 0.531674 |
-| Jupiter |  5.202480 | 0.048536 |  1.298612 |  36.661343 |  14.275092 | 100.292926 |       1,047.35 | 0.084312 |
-| Saturn  |  9.541499 | 0.055508 |  2.494244 |  51.012584 |  92.861776 | 113.639795 |       3,497.90 | 0.033934 |
-| Uranus  | 19.187979 | 0.046857 |  0.772980 | 314.531250 | 172.434115 |  73.962546 |      22,902.98 | 0.011898 |
-| Neptune | 30.069528 | 0.008954 |  1.770055 | 304.390368 |  46.681595 | 131.786354 |      19,412.24 | 0.006065 |
-| Pluto   | 39.486864 | 0.248852 | 17.141043 | 239.076645 | 224.097019 | 110.301674 | 135,200,000.00 | 0.004030 |
+<img width="950" height="227" alt="image" src="https://github.com/user-attachments/assets/5fba06c3-992d-4612-8098-3d45e91962d0" />
 
-| Planet  |    X (AU) |     Y (AU) |    Z (AU) | dX (AU/day) | dY (AU/day) | dZ (AU/day) |
-| ------- | --------: | ---------: | --------: | ----------: | ----------: | ----------: |
-| Mercury |  0.358526 |  -0.106879 | -0.041645 |    0.430457 |    1.391078 |    0.120314 |
-| Venus   | -0.487349 |  -0.534719 |  0.020837 |    0.736535 |   -0.768155 |   -0.060645 |
-| EM Bary | -0.618403 |   0.766560 | -0.000007 |   -0.744165 |   -0.066584 |    0.000007 |
-| Mars    |  1.350592 |   0.405908 | -0.024824 |    0.095098 |    0.595876 |    0.022744 |
-| Jupiter |  3.867224 |   3.121652 | -0.098899 |   -0.223549 |    0.372844 |    0.004800 |
-| Saturn  |  6.293676 |   6.646577 | -0.367245 |    0.160846 |    0.403457 |    0.006225 |
-| Uranus  | 14.722180 | -13.405438 | -0.240866 |    0.202583 |    0.143967 |   -0.001386 |
-| Neptune | 16.582785 | -25.154680 |  0.135889 |    0.145895 |    0.096851 |   -0.005569 |
-| Pluto   | -9.778478 | -28.018106 |  5.826840 |    0.039538 |   -0.139792 |   -0.041507 |
+> Action-angle delaunay elements, canonical to the Hamiltonian:
+> 
+> $$\mathcal{H} = -\frac{\mu^3 \gamma^2}{2L^2} = -\frac{\mu \gamma}{2a}$$
 
-- visualization.html gives you a 3d view of the planets' posiiton in 3d space and their distance to the Sun (in AU)
-<img width="1854" height="884" alt="image" src="https://github.com/user-attachments/assets/54f33364-34ff-4a97-8e1f-eb664a3e88e0" />
+#
+
+<img width="950" height="482" alt="image" src="https://github.com/user-attachments/assets/7a2c47f5-207e-4fab-b1cd-96a7b8aba092" />
+
+> Poincaré elements (first and second kind) canonical to the Hamiltonian:
+>
+> $$\mathcal{H} = -\frac{\mu^3 \gamma^2}{2\Lambda^2} = -\frac{\mu \gamma}{2a}$$
+>
+
+#
+
+The program also generates a 3D visualization of the planetary configuration in `CelestialMechanics/visualization.html` as well as display the planets' coordiantes in 3d space, their distance to the Sun (in AU), their relative mass and how many revolutions the given planet is making in one Earth year
+
+<img width="1855" height="888" alt="image" src="https://github.com/user-attachments/assets/591f0e2d-6c26-43ad-8acc-867ad71e7215" />
+<img width="1842" height="555" alt="image" src="https://github.com/user-attachments/assets/a7b8d35e-d51e-4c46-b930-c9174b3221a4" />
+
